@@ -49,3 +49,17 @@ you see fit. We will discuss your interpretation of the requirements during the 
 
 - Each filtering option has a count displayed next to it which indicates how many results are matched by the filter. The numbers have to take into account selected filters in other groups and update as user checks or unchecks filters to be accurate for the current filtering combination.
 - You should show only the options that will match at least one album. Thus, filtering options might change as user selects other filters. For example, if user selected price range 0-5 and there are no albums that cost less than $5 and were released in 2017, you shouldn't show year 2017 as a filtering option. But 2017 should appear as filtering option when user selects 5-10 price range (or has no price selected) because there are some albums that were released in 2017 and cost $9.99.
+
+## Developer notes
+
+- I've implemented the search logic with a simple version of full text search in mind: albums are searched using words as tokens, as opposed to a wildcard search
+  - of course, in a real application where text is indexed (i.e. into an `ElasticSearch` index) the approach would probably be slightly different (e.g. shorter tokens).
+- All leading/trailing whitespaces from the search query are trimmed.
+- Price ranges are right-open intervals, i.e. the lower bound is inclusive and the upper is exclusive (e.g. `[5-10)`).
+- Whitespaces in year and price range parameters supplied via the API are ignored.
+- Year and price range parameters supplied via the API are validated and all errors are collected and included in the exception message if:
+  - any of the parameters are malformed (year isn't a number or price range isn't two numbers separated by a minus sign)
+  - price range start or end is negative
+  - any of the price ranges are "backwards" (range start is after range end)
+- Album entry collection is only iterated over once to build all three portions of data needed for `Results`
+- I've also fixed rendering of the number of found documents on the page.
