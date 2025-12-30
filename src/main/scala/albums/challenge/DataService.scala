@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate
 class DataService(restTemplate: RestTemplate) {
   private val logger: Logger = LogManager.getLogger(classOf[DataService])
   private val uri: String =
-    "https://itunes.apple.com/us/rss/topalbums/limit=200/json"
+    "https://itunes.apple.com/us/rss/topalbums/limit=100/json"
 
   @Cacheable(Array("entry"))
   def fetch(): List[Entry] = {

@@ -48,10 +48,10 @@ class SearchServiceTest extends munit.FunSuite {
     )
   }
 
-  test("Search by general keyword") {
+  test("Search by general keyword (ignoring leading/trailing query string whitespaces)") {
     assertEquals(
-      searchService.search(entries, "best").items,
-      entries,
+      searchService.search(entries, " best  ").items,
+      List(entry1, entry2, entry3, entry5),
     )
   }
 
@@ -65,14 +65,14 @@ class SearchServiceTest extends munit.FunSuite {
   test("Price facet generation") {
     assertEquals(
       searchService.search(entries, "best").facets.get("price"),
-      Some(List(Facet("5 - 10", 1), Facet("15 - 20", 1))),
+      Some(List(Facet("5 - 10", 2), Facet("15 - 20", 1), Facet("20 - 25", 1))),
     )
   }
 
   test("Year facet generation") {
     assertEquals(
       searchService.search(entries, "best").facets.get("year"),
-      Some(List(Facet("2008", 1), Facet("2002", 1))),
+      Some(List(Facet("2008", 1), Facet("2002", 1), Facet("1983", 1), Facet("1978", 1))),
     )
   }
 
@@ -82,11 +82,11 @@ class SearchServiceTest extends munit.FunSuite {
 
     assertEquals(
       result.items,
-      entries,
+      List(entry1, entry2),
     )
     assertEquals(
       result.facets.get("year"),
-      Some(List(Facet("2008", 1), Facet("2002", 1))),
+      Some(List(Facet("2008", 1), Facet("2002", 1), Facet("1983", 1), Facet("1978", 1))),
     )
     assertEquals(
       result.facets.get("price"),
@@ -104,7 +104,7 @@ class SearchServiceTest extends munit.FunSuite {
     )
     assertEquals(
       result.facets.get("year"),
-      Some(List(Facet("2002", 1))),
+      Some(List(Facet("2002", 1), Facet("1978", 1))),
     )
     assertEquals(
       result.facets.get("price"),
@@ -112,7 +112,7 @@ class SearchServiceTest extends munit.FunSuite {
     )
   }
 
-  test("Filter returns zero count") {
+  test("Filter does not return zero counts for facets not matching any year/price") {
     val result = searchService.search(
       entries,
       "best",
@@ -126,7 +126,7 @@ class SearchServiceTest extends munit.FunSuite {
     )
     assertEquals(
       result.facets.get("year"),
-      Some(List(Facet("2008", 1), Facet("2002", 0))),
+      Some(List(Facet("2008", 1))),
     )
     assertEquals(
       result.facets.get("price"),

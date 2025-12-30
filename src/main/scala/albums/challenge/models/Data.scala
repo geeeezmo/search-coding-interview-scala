@@ -2,13 +2,12 @@ package albums.challenge.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-case class Data(feed: Data.Feed) {
-  def this() = this(Data.Feed(List()))
+case class Data(feed: Data.Feed = Data.Feed()) {
   def convert(): List[Entry] = feed.entry
     .map { entry =>
       Entry(
         entry.title.label,
-        entry.price.label.tail.toFloat,
+        entry.price.attributes.amount.toFloat,
         entry.releaseDate.label,
         entry.link.attributes.href,
         entry.images.head.label,
@@ -17,7 +16,7 @@ case class Data(feed: Data.Feed) {
 }
 
 object Data {
-  case class Feed(entry: List[Feed.Entry]) {
+  case class Feed(entry: List[Feed.Entry] = List.empty) {
     def this() = this(List())
   }
 
@@ -26,11 +25,15 @@ object Data {
         title: Label,
         link: Link,
         @JsonProperty("im:image") images: List[Label],
-        @JsonProperty("im:price") price: Label,
+        @JsonProperty("im:price") price: Price,
         @JsonProperty("im:releaseDate") releaseDate: Label,
     )
 
     case class Label(label: String)
+
+    case class Price(label: String, attributes: PriceAttributes)
+
+    case class PriceAttributes(amount: String)
 
     case class Link(attributes: Attributes)
 
