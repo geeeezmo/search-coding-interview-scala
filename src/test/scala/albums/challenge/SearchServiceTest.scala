@@ -62,6 +62,13 @@ class SearchServiceTest extends munit.FunSuite {
     )
   }
 
+  test("Search by multiple keywords (tokens)") {
+    assertEquals(
+      searchService.search(entries, "the best").items,
+      entries,
+    )
+  }
+
   test("Price facet generation") {
     assertEquals(
       searchService.search(entries, "best").facets.get("price"),
@@ -74,6 +81,14 @@ class SearchServiceTest extends munit.FunSuite {
       searchService.search(entries, "best").facets.get("year"),
       Some(List(Facet("2008", 1), Facet("2002", 1), Facet("1983", 1), Facet("1978", 1))),
     )
+  }
+
+  test("Search fails with a list of errors if any of the years or price ranges are malformed") {
+    interceptMessage[IllegalArgumentException](
+      "errors: [invalid year: 2008_, invalid price range: 3 - 2, invalid price range: 5 -= 10]",
+    ) {
+      searchService.search(entries, "best", List("2002", "2008_"), List("3 - 2", "5 -= 10"))
+    }
   }
 
   test("Filter multiple facet values") {
@@ -131,6 +146,50 @@ class SearchServiceTest extends munit.FunSuite {
     assertEquals(
       result.facets.get("price"),
       Some(List(Facet("5 - 10", 1), Facet("15 - 20", 1))),
+    )
+  }
+
+  test("Filter does not return any entries or facets if no albums match the search query") {
+    val result = searchService.search(
+      entries,
+      "query not matching any albums",
+    )
+
+    assertEquals(
+      result.items,
+      List(),
+    )
+    assertEquals(
+      result.facets.get("year"),
+      Some(List()),
+    )
+    assertEquals(
+      result.facets.get("price"),
+      Some(List()),
+    )
+  }
+
+  test(
+    "Filter does not return any entries or facets if no albums match the year AND price filters",
+  ) {
+    val result = searchService.search(
+      entries,
+      "best",
+      List("2025"),
+      List("30 - 35"),
+    )
+
+    assertEquals(
+      result.items,
+      List(),
+    )
+    assertEquals(
+      result.facets.get("year"),
+      Some(List()),
+    )
+    assertEquals(
+      result.facets.get("price"),
+      Some(List()),
     )
   }
 }
