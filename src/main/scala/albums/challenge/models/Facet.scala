@@ -1,3 +1,3 @@
-package albums.challenge.models;
+package albums.challenge.models
 
-case class Facet(value: String, count: Integer)
+case class Facet(value: String, count: Int)

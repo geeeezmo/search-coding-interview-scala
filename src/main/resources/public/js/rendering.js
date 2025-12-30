@@ -35,7 +35,7 @@ export function renderContent(documents) {
     })
 
     content.innerHTML = `
-        Found ${escapeHtml(documents.size)} documents
+        Found ${escapeHtml(documents.length)} documents
         ${Array.from(documents).map(document => {
             return `<div class="document">
                 <div class="title" >
